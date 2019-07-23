@@ -1,0 +1,93 @@
+import java.util.Scanner;
+public class Beibao {
+    static  int n ;  	//定义物品个数
+    static int num;		//定义约束条件个数
+    static int C[]; 	 //定义各约束条件上限
+    static int Weights[] [];  //定义表示属性的数组
+    static double Values[] ;  //定义表示价值的数组
+    static double ans = 0;   //定义最大价值ans
+    static int w[];		//当前约束条件的值
+    static int x[];		//最佳物品装入方法
+    static int a[];		//当前物品装入方法
+    
+    //回溯法深度优先算法
+    //step表示当前搜索深度即第几个物品，sum表示当前价值
+    public static void Dfs(int step,double sum){
+        if(can(step,sum)==false) return;		//不满足情况   return
+        if(step>n){		//step==n时到达叶子节点
+            if(sum>ans){	//如果当前价值大于最大价值更新物品装入方法
+                for(int i=1;i<=n;++i)
+                    x[i]=a[i];
+                ans=sum;
+            }
+            return ;
+        }
+        if(check(step)){
+            for(int i=1;i<=num;++i)
+                w[i]+=Weights[i][step];		//更改当前各约束条件的值
+            a[step]=1;		//将物品装入背包
+            Dfs(step+1,sum+Values[step]);		//递归搜索第step+1个物品，并把加上第step个物品价值后的sum+Values[step]赋值给sum
+            a[step]=0;		//回溯时将物品先设置为不装入背包
+            for(int i=1;i<=num;++i)
+                w[i]-=Weights[i][step];		//因为不装入背包了，所以当前各约束条件的值也要相应的更改即减掉第step个物品的各个属性
+        }
+        a[step]=0;			//不装入物品step
+        Dfs(step+1,sum);	//不装入第step个物品时，递归搜索第step+1个物品
+        
+        //Dfs()方法执行完毕，向上层回溯
+    }
+    
+    
+    
+    
+    //check方法检查是否超过约束条件上限，超过返回false，不超过返回true
+    public static boolean check(int k)		//形参k表示当前是第几个物品
+    {
+        for(int i=1;i<=num;++i){	//num是约束条件的个数
+        	//如果当前第i个约束条件的值w[i]加上第k个物品的第i个属性的值Weights[i][k]大于第i个约束条件的上限，直接返回false
+            if(w[i]+Weights[i][k]>C[i])
+                return  false;
+        }
+        return true;	//所有约束条件都满足的情况下返回true
+    }
+    
+    public static boolean can(int i,double sum)
+
+    {
+        for(int k=i;k<=n;++k)
+            sum+=Values[k];		//求出可能的最大价值
+        if(sum>ans) return true;      //如果可能的最大价值大于当前最大价值，返回true
+        return false;
+    }
+    
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        C = new int[100];				//各约束条件上限
+        Weights = new int[100][100];	//物品属性
+        Values = new double[100];		//物品价值
+        a=new int[51];		
+        x=new int[51];		//路径
+        w=new int[51];		//上限
+        n = sc.nextInt();		// 物品的个数
+        num= sc.nextInt();		//约束条件的个数
+        for(int i = 1; i <= n; i++) {          
+            Values[i] = sc.nextDouble();      //输入物品的价值
+        }
+        for(int i = 1; i <=num; i++) {         
+            for(int j = 1; j <= n; j++) {        
+                Weights[i][j]=sc.nextInt();    //输入物品的属性
+            }
+        }
+        for(int j = 1;j <=num; j++) {
+            C[j] = sc.nextInt();		//输入各约束条件上限
+        }
+        Dfs(1,0);		//调用回溯法
+        //输出
+        System.out.print("x[");
+        for(int i=1;i<=n;++i)
+            System.out.print(x[i]+" ");
+        System.out.println("]");
+        System.out.println("总价值为"+ans);
+
+    }
+}
